@@ -1,0 +1,7 @@
+package.json
+package-lock.json
+.github
+.gitignore
+pnpm-lock.yaml
+.git
+.bookignore
