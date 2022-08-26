@@ -1,0 +1,52 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Build for Github Pages
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Use Node.js and npm cache
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: "npm"
+
+      - name: install
+        run: npm install
+
+      - name: Get latest version
+        id: get_version
+        run: |
+          LATEST_VERSION=$(git tag --sort=-creatordate | head -1)
+          echo ::set-output name=LATEST_VERSION::$LATEST_VERSION
+
+      - name: Get latest build
+        id: get_build
+        run: |
+          LATEST_BUILD=$(git rev-parse HEAD)
+          echo ::set-output name=LATEST_BUILD::$LATEST_BUILD
+
+      - name: Update package.json
+        run: |
+          npm --no-git-tag-version version ${{ steps.get_version.outputs.LATEST_VERSION }}-${{ steps.get_build.outputs.LATEST_BUILD }}
+
+      - name: build
+        run: npx honkit build
+
+      - name: deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
