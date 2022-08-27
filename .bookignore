@@ -5,3 +5,4 @@ package-lock.json
 pnpm-lock.yaml
 .git
 .bookignore
+_book
